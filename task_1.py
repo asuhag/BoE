@@ -1,5 +1,5 @@
 import pandas as pd
-from explore_datafile import *
+from utils import *
 
 page_1 = get_data('DataScientist_009749_Dataset.xlsx', 'Dataset 1 - General')
 
