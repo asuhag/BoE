@@ -16,20 +16,13 @@ merged_df.drop(index = 0, inplace = True)
 #merged_df.to_csv('data.csv', index = False)
 
 convert_columns_to_numeric(merged_df)
-new_df = replace_outliers_with_mad(merged_df)
+new_df = replace_outliers_with_mad(merged_df, special_cols= {'SCR cr': 'mean'})
 
 # Top 5 companies with high liquidity risk 
 new_df['Avg SCR cr'] = new_df.filter(regex='SCR cr').mean(axis = 1)
 top_5_lowest_scr = new_df.sort_values(by='Avg SCR cr').head(5)[['Firm','Avg SCR cr']]
 plot_top_firms_with_average(new_df, top_5_lowest_scr, 'Avg SCR cr', 'Liquidity risk - Top 5 Firms with Lowest Average SCR coverage ratio', 
                             'Firm', 'Average SCR coverage ratio') 
-
-# Top 5 companies with high strategic risk
-new_df['Avg NBEL'] = new_df.filter(regex='NBEL').mean(axis = 1)
-top_5_highest_nbel = new_df.sort_values(by='Avg NBEL', ascending=False).head(5)[['Firm','Avg NBEL']]
-
-plot_top_firms_with_average(new_df, top_5_highest_nbel, 'Avg NBEL', 'Strategic risk - Top 5 Firms with Highest Average NBEL', 
-                            'Firm', 'Average NBEL Ratio') 
 
 # Top 5 companies with high operation risk 
 new_df['Avg NCR'] = new_df.filter(regex='NCR').mean(axis=1)

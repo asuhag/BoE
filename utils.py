@@ -80,19 +80,25 @@ def get_data(filepath,sheetname):
         return df[new_name_2]
     
 
-def replace_outliers_with_mad(df, exclude_col = 'Firm', threshold=3.5):
+def replace_outliers_with_mad(df, special_cols=None, threshold=3.5):
     """
-    Replace outliers in all numeric columns of a DataFrame, except for a specified column, with the median of the respective column.
+    Replace outliers in all numeric columns of a DataFrame, with the median.
+    For specified columns, replace outliers with the mean.
     Outliers are determined based on Median Absolute Deviation (MAD).
 
+    special_cols (dict): A dictionary where keys are column names and values are 'mean' or 'median' for replacement.
+    threshold (float): The threshold value for determining outliers based on the modified Z-score.
     """
     df_copy = df.copy()
+    special_cols = special_cols or {}
 
-    # Identifying numeric columns except the exclude_col
-    numeric_cols = [col for col in df_copy.columns if df_copy[col].dtype.kind in 'biufc' and col != exclude_col]
+    # Identifying numeric columns
+    numeric_cols = df_copy.select_dtypes(include=[np.number]).columns.tolist()
 
     for col in numeric_cols:
+        # Calculate the median and the mean
         col_median = df_copy[col].median()
+        col_mean = df_copy[col].mean()
 
         # Calculating the Median Absolute Deviation (MAD)
         mad = np.median(np.abs(df_copy[col] - col_median))
@@ -107,8 +113,11 @@ def replace_outliers_with_mad(df, exclude_col = 'Firm', threshold=3.5):
         # Identifying outliers
         outliers = np.abs(modified_z_score) > threshold
 
-        # Replacing outliers with the median value
-        df_copy.loc[outliers, col] = col_median
+        # Replacing outliers with the median or mean based on special_cols
+        if col in special_cols and special_cols[col] == 'mean':
+            df_copy.loc[outliers, col] = col_mean
+        else:
+            df_copy.loc[outliers, col] = col_median
 
     return df_copy
 
